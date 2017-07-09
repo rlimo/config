@@ -60,7 +60,7 @@ export HISTFILESIZE=$HISTSIZE;
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git node npm git git-extras extract)
+plugins=(git node npm git git-extras extract alias-tips z)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -115,8 +115,8 @@ function pgrep(){
 
 alias pgrep1='ps -ef | grep $1'
 alias agrep='alias | grep $1'
-alias gf='git fetch origin master'
-alias gm='git merge origin master'
+alias gf='git fetch origin $(current_branch)'
+alias gm='git merge origin $(current_branch)'
 alias g1='git log --oneline'
 alias u='sudo apt update'
 alias y='yarn run build:server-dev'
@@ -126,3 +126,46 @@ alias ngrep='sudo netstat -natop | grep $1'
 alias dp='docker ps -a'
 alias pbcopy='xclip -selection clipboard'
 alias pbpaste='xclip -selection clipboard -o'
+alias glog="git log --graph --pretty=format:'%Cred%h%Creset %an: %s - %Creset %C(yellow)%d%Creset %Cgreen(%cr)%Creset' --abbrev-commit --date=relative"
+function ip() {
+    curl -s ipinfo.io/$1
+}
+
+
+function lastcommandfailed() {
+  code=$?
+  if [ $code != 0 ]; then
+    echo -n $'\033[37;1m[exited \033[31;1m'
+    echo -n $code
+    echo -n $'\033[37;1m] '
+  fi
+}
+
+function new_tmux() {
+    TMUX= tmux new-session -d -s $1
+    tmux switch-client -t $1
+}
+
+function activevirtualenv() {
+  if [ -n "$VIRTUAL_ENV" ]; then
+      echo -n "("
+      echo -n $(basename $VIRTUAL_ENV)
+      echo -n ") "
+  fi
+}
+
+function json_keys() {
+    grep "{.*}" -o $1 | jq -r 'keys' | grep "[a-z]" | sort -u
+}
+
+function json() {
+    grep "{.*}" -o $1 | jq -r $2
+}
+
+alias ntmux="TMUX= tmux new-session -d -s "
+alias stmux="tmux switch-client -t "
+alias df='df -h'
+alias du='du -h -c'
+alias mkdir='mkdir -p'
+alias gurl='perl -pe s@\"\}@@g | perl -pe s@\\\\/@/@g | grep -i -o -P "http://[^\s\\\\\"]+"'
+alias gip='grep -Eo "([0-9]{1,3}\.){3}[0-9]{1,3}"'
