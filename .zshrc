@@ -9,6 +9,8 @@
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
 ZSH_THEME="robbyrussell"
 
+#ZSH_THEME="powerlevel9k/powerlevel9k"
+#POWERLEVEL9K_MODE='awesome-fontconfig'
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
 
@@ -39,7 +41,8 @@ ZSH_HIGHLIGHT_PATTERNS=('rm -rf *' 'fg=white,bold,bg=red')
 
 export HISTSIZE=32768;
 export HISTFILESIZE=$HISTSIZE;
-#export HISTCONTROL=ignoredups;
+export HISTCONTROL=ignoredups;
+setopt  HISTAPPEND;
 #export HISTIGNORE="ls:cd:cd -:pwd:exit:date:* --help";
 
 
@@ -60,7 +63,7 @@ export HISTFILESIZE=$HISTSIZE;
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git node npm git git-extras extract alias-tips z)
+plugins=(git node npm git git-extras extract alias-tips z zsh-autosuggestions)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -106,6 +109,7 @@ function i()
 }
 
 function f() { find . -type f -name "$1" }
+function fd() { find . -type d -name "$1" }
 
 function de(){docker exec -it $1 bash}
 
@@ -118,19 +122,92 @@ alias agrep='alias | grep $1'
 alias gf='git fetch origin $(current_branch)'
 alias gm='git merge origin $(current_branch)'
 alias g1='git log --oneline'
+alias g1me='g1 --author="$(g config user.name)"'
 alias u='sudo apt update'
-alias y='yarn run build:server-dev'
 alias h='history'
 alias hg='history | grep $1'
+alias j='jobs -l'
 alias ngrep='sudo netstat -natop | grep $1'
 alias dp='docker ps -a'
 alias pbcopy='xclip -selection clipboard'
 alias pbpaste='xclip -selection clipboard -o'
+alias ltr='ll -ltr'
+alias number="sed ':a;s/\B[0-9]\{3\}\>/,&/;ta'"
+alias threads='ps -T -p $1'
+alias 'wcl'=' wc -l | number'
+alias gwhat='git diff --stat --cached origin/master'
 alias glog="git log --graph --pretty=format:'%Cred%h%Creset %an: %s - %Creset %C(yellow)%d%Creset %Cgreen(%cr)%Creset' --abbrev-commit --date=relative"
-function ip() {
+alias sea="nc seashells.io 1337"
+alias iotop="_ iotop"
+alias listen='sudo lsof -i -P | grep -i "listen"'
+alias diff='colordiff'
+alias lastfiles='ls -1 | tail -n $1'
+alias h1='`!!` |  head -1'
+alias t1='!! |  tail -1' 
+
+alias ntmux="TMUX= tmux new-session -d -s "
+alias stmux="tmux switch-client -t "
+alias df='df -h'
+alias du='du -h -c'
+alias mkdir='mkdir -p'
+alias gurl='perl -pe s@\"\}@@g | perl -pe s@\\\\/@/@g | grep -i -o -P "http://[^\s\\\\\"]+"'
+alias gip='grep -Eo "([0-9]{1,3}\.){3}[0-9]{1,3}"'
+alias path='echo -e ${PATH//:/\\n}'
+alias now='date +"%T"'
+alias nowtime=now
+alias nowdate='date +"%d-%m-%Y"'
+alias ports='netstat -tulanp'
+
+#flat tar - make it generalize
+#find . -name '*.jar' -not -name '*sources*' -exec tar --transform 's/.*\///g' -rvf my_file.tar {} \;
+
+
+
+function myip() {
     curl -s ipinfo.io/$1
 }
 
+function le() {
+  if [[ $# -eq 0 ]]; then
+    if [ -d $1 ] ; then
+        builtin cd `ls -rt | tail -n1`
+    else
+      command less `ls -rt | tail -n1`
+    fi
+  else
+      command less `ls -rt $1 | tail -n1`
+  fi
+}
+
+function show() {
+  if [[ $1 == *.tar.gz ]]; then
+      tar -ztvf $1
+  elif [[ $1 == *.tar ]]; then
+          tar -tvf $1
+  elif [[ $1 == *.zip ]]; then
+        unzip -l $1
+  elif [[ $1 == *.jar  ]]; then
+        jar tf $1
+  else
+      echo "not defined yet..."
+  fi
+}
+
+cdl()    {
+  cd"$@";
+  ltr;
+}
+
+
+function mkcd () {
+  mkdir "$1"
+  cd "$1"
+}
+
+function bck () {
+  cp "$2" "$2.bck"
+  cp "$1" "$2"
+}
 
 function lastcommandfailed() {
   code=$?
@@ -162,10 +239,52 @@ function json() {
     grep "{.*}" -o $1 | jq -r $2
 }
 
-alias ntmux="TMUX= tmux new-session -d -s "
-alias stmux="tmux switch-client -t "
-alias df='df -h'
-alias du='du -h -c'
-alias mkdir='mkdir -p'
-alias gurl='perl -pe s@\"\}@@g | perl -pe s@\\\\/@/@g | grep -i -o -P "http://[^\s\\\\\"]+"'
-alias gip='grep -Eo "([0-9]{1,3}\.){3}[0-9]{1,3}"'
+
+#############################   medaware relevant ##########################################
+alias myuser="echo medaware_rlimony"
+alias y='yarn run build:server-dev'
+
+
+function dmed(){
+  de `dp | grep tomcat | awk '{print $1}'`
+}
+
+function dmysql(){
+  de `dp | grep mysql | awk '{print $1}'`
+}
+
+test() {
+    if [[ $@ == "ssh" ]]; then
+        command sshpass -p medaware ssh medaware@192.168.1.81
+    elif [[ $1 == "scp" ]];
+    then
+        command sshpass -p medaware scp -r $2 medaware@192.168.1.81:/home/medaware/temp
+    else
+
+    fi
+}
+test96(){
+  if [[ $@ == "ssh" ]]; then
+      command sshpass -p medaware ssh medaware@192.168.1.96
+  elif [[ $1 == "scp" ]];
+  then
+      command sshpass -p medaware scp -r $2 medaware@192.168.1.96:/home/medaware/temp
+  else
+
+  fi
+}
+
+staging(){
+  if [[ $@ == "ssh" ]]; then
+      command sshpass -p medaware ssh medaware@192.168.1.188
+  elif [[ $1 == "scp" ]];
+  then
+      command sshpass -p medaware scp -r $2 medaware@192.168.1.188:/home/medaware/temp
+  else
+
+  fi
+}
+
+
+transfer() { if [ $# -eq 0 ]; then echo -e "No arguments specified. Usage:\necho transfer /tmp/test.md\ncat /tmp/test.md | transfer test.md"; return 1; fi
+tmpfile=$( mktemp -t transferXXX ); if tty -s; then basefile=$(basename "$1" | sed -e 's/[^a-zA-Z0-9._-]/-/g'); curl --progress-bar --upload-file "$1" "https://transfer.sh/$basefile" >> $tmpfile; else curl --progress-bar --upload-file "-" "https://transfer.sh/$1" >> $tmpfile ; fi; cat $tmpfile; rm -f $tmpfile; }
