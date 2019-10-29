@@ -137,7 +137,7 @@ alias gf='git fetch origin $(current_branch)'
 alias gm='git merge origin $(current_branch)'
 alias gp='git push origin $(current_branch)'
 alias gpc='git push origin $(current_branch) && custom-build'
-alias glom='gl origin master'
+alias glom='sudo git pull origin master'
 alias g1='git log --oneline'
 alias g1me='g1 --author="$(g config user.name)"'
 alias u='sudo apt update'
@@ -151,6 +151,7 @@ alias pbcopy='xclip -selection clipboard'
 alias pbpaste='xclip -selection clipboard -o'
 alias p='| pbcopy'
 alias ltr='exa -l -snew'
+alias lst='exa -l -snew'
 alias lsr='exa -l --sort=size'
 alias lall='exa -bghHliS'
 alias number="sed ':a;s/\B[0-9]\{3\}\>/,&/;ta'"
@@ -191,8 +192,18 @@ alias cat='bat'
 alias ping='prettyping --nolegend'
 alias S='_ !!'
 alias d='dirs -v | head -10'
-alias idea='/opt/idea/ideaIC-2018.3/idea-IC-183.4284.148/bin/idea.sh &'
 alias mytilix='tilix --maximize  -s /home/roy/sessions/mysql.json -s /home/roy/sessions/medaware.json -s /home/roy/sessions/logs.json -s /home/roy/sessions/test.json &'
+alias idea='sudo /opt/idea/ideaIC-2019.1/idea-IC-191.6183.87/bin/idea.sh &'
+#alias idea='sudo /opt/idea/ideaIC-2018.3/idea-IC-183.4284.148/bin/idea.sh &'
+alias medaware='/home/roy/dev/workspace/medaware'
+alias lmed='less -G /home/dev/medaware/tomcat/logs/medaware-all.log'
+alias llog='less -G /home/dev/medaware/tomcat/logs/medaware-all.log'
+alias lerr='less -G /home/dev/medaware/tomcat/logs/medaware-error.log'
+alias lsla='less -G /home/dev/medaware/tomcat/logs/medaware-sla.log'
+alias tlog='less -G /home/medaware/docker/tomcat/logs/tests_debug.log'
+alias logs='cd /home/dev/medaware/tomcat/logs'
+alias watch='watch '
+
 function mylocalip(){
 	ip addr | grep enp0 | grep inet | awk {'print $2'} | sed 's/.\{3\}$//'
 }
@@ -296,6 +307,13 @@ echo "explain 'cmd -o | ...'   one quoted command to explain it."
 fi
 }
 
+function swap()         
+{
+    local TMPFILE=tmp.$$
+    mv "$1" $TMPFILE
+    mv "$2" "$1"
+    mv $TMPFILE "$2"
+}
 
 #############################   medaware relevant ##########################################
 alias myuser="echo medaware_rlimony"
@@ -422,7 +440,7 @@ medData(){
 
  fi
 }
-PATH=$(echo "$PATH" | sed -e 's/\/home\/roy\/.nvm\/versions\/node\/v8.0.0\/bin://')
+#PATH=$(echo "$PATH" | sed -e 's/\/home\/roy\/.nvm\/versions\/node\/v8.0.0\/bin://')
 
 function color-ssh() {
     trap "colorterm.sh" INT EXIT
