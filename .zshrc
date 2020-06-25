@@ -107,6 +107,7 @@ eval $(thefuck --alias)
 
 alias v='f -e vim'
 alias c='f -e bat'
+alias sudo='sudo '
 
 if [ $TILIX_ID ] || [ $VTE_VERSION ]; then
         source /etc/profile.d/vte.sh
@@ -131,8 +132,12 @@ function pgrep(){
   ps -ef | grep $1 | awk '{print $2}'
 }
 
+alias medpid="docker top medaware_app | head -c 170 | grep -o '[[:digit:]]*'"
 alias pgrep1='ps -ef | grep $1'
 alias agrep='alias | grep $1'
+alias grepi='grep -i $1'
+alias gbd='git branch --sort=committerdate'
+alias gall='git branch --sort=committerdate'
 alias gf='git fetch origin $(current_branch)'
 alias gm='git merge origin $(current_branch)'
 alias gp='git push origin $(current_branch)'
@@ -146,10 +151,12 @@ alias hg='history | grep $1'
 alias j='jobs -l'
 alias ngrep='sudo netstat -natop | grep $1'
 alias dp='docker ps '
+alias dps='docker ps --format '\''table {{.ID}}\t{{.Names}}\t{{.Status}}\t{{.Image}}'\'''
 alias dpa='docker ps -a'
-alias pbcopy='xclip -selection clipboard'
+alias pbcopy='xargs echo -n | xclip -selection clipboard'
 alias pbpaste='xclip -selection clipboard -o'
 alias p='| pbcopy'
+alias pwd='pwd | tee /dev/tty | pbcopy'
 alias ltr='exa -l -snew'
 alias lst='exa -l -snew'
 alias lsr='exa -l --sort=size'
@@ -193,9 +200,11 @@ alias ping='prettyping --nolegend'
 alias S='_ !!'
 alias d='dirs -v | head -10'
 alias mytilix='tilix --maximize  -s /home/roy/sessions/mysql.json -s /home/roy/sessions/medaware.json -s /home/roy/sessions/logs.json -s /home/roy/sessions/test.json &'
-alias idea='sudo /opt/idea/ideaIC-2019.1/idea-IC-191.6183.87/bin/idea.sh &'
+alias idea='sudo /opt/idea/ideaIC-2020.1/idea-IC-201.6668.121/bin/idea.sh '
 #alias idea='sudo /opt/idea/ideaIC-2018.3/idea-IC-183.4284.148/bin/idea.sh &'
 alias medaware='/home/roy/dev/workspace/medaware'
+alias startMed='docker start medaware_db;docker start medaware_app'
+alias startMac='docker start medaware_mssql;docker start medaware_db;docker start medaware_app'
 alias lmed='less -G /home/dev/medaware/tomcat/logs/medaware-all.log'
 alias llog='less -G /home/dev/medaware/tomcat/logs/medaware-all.log'
 alias lerr='less -G /home/dev/medaware/tomcat/logs/medaware-error.log'
@@ -203,9 +212,27 @@ alias lsla='less -G /home/dev/medaware/tomcat/logs/medaware-sla.log'
 alias tlog='less -G /home/medaware/docker/tomcat/logs/tests_debug.log'
 alias logs='cd /home/dev/medaware/tomcat/logs'
 alias watch='watch '
+alias pick1='docker exec -i medaware_db mysql -u medaware -pmedaware medaware -e "select patientid from patients" 2>/dev/null | tail -1 | tee /dev/tty | pbcopy'
+alias count="docker exec -i medaware_db mysql -u medaware -pmedaware medaware -e 'select count(patientid) from patients' 2>/dev/null"
+alias pids="docker exec -i medaware_db mysql -u medaware -pmedaware medaware -e 'select patientid from patients' 2>/dev/null"
 
+function c1() {
+  echo -e $@ | tee /dev/tty | pbcopy
+}
+function lsofw() {
+  sudo lsof -p $1 | awk 'NR==1 || $4~/[0-9]+[uw]/'
+}
+function realpath() {
+  /usr/bin/realpath $1 | tee /dev/tty | pbcopy
+}
+function pick {
+         google-chrome "http://localhost:8080/MedAwareDemo/reports/#/patient?admissionID=-1&patientID=int`docker exec -i medaware_db mysql -u medaware -pmedaware medaware -e 'select patientid from patients' 2>/dev/null | tail -1`"
+}
 function mylocalip(){
-	ip addr | grep enp0 | grep inet | awk {'print $2'} | sed 's/.\{3\}$//'
+	ip addr | grep enp0 | grep inet | awk {'print $2'} | sed 's/.\{3\}$//' | tee /dev/tty | pbcopy
+}
+function mywifiip(){
+       ip addr | grep wlp3s0 | grep inet | awk {'print $2'} | sed 's/.\{3\}$//' | tee /dev/tty | pbcopy
 }
 #flat tar - make it generalize
 #find . -name '*.jar' -not -name '*sources*' -exec tar --transform 's/.*\///g' -rvf my_file.tar {} \;
