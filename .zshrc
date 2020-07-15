@@ -8,6 +8,7 @@
 # it'll load a random theme each time that oh-my-zsh is loaded.
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
 ZSH_THEME="robbyrussell"
+#ZSH_THEME="random"
 
 
 #ZSH_THEME="powerlevel9k/powerlevel9k"
@@ -47,6 +48,8 @@ setopt  HISTAPPEND;
 #export HISTIGNORE="ls:cd:cd -:pwd:exit:date:* --help";
 
 
+export PS1="\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$"
+
 # Uncomment the following line if you want to disable marking untracked files
 # under VCS as dirty. This makes repository status check for large repositories
 # much, much faster.
@@ -64,7 +67,7 @@ setopt  HISTAPPEND;
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git node npm git git-extras extract alias-tips z zsh-autosuggestions colored-man-pages fasd fzf )
+plugins=(git node npm git git-extras extract alias-tips z zsh-autosuggestions colored-man-pages fasd fzf sudo)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -101,16 +104,32 @@ source $ZSH/oh-my-zsh.sh
 #sudo mount 192.168.1.98:/home/medaware/Tests /mnt/nfs
 #sudo mount 192.168.1.98:/home/medaware/SHEBA/pull_data /home/dev/medaware/pull_data
 
+export FZF_DEFAULT_COMMAND='fd --type file'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_DEFAULT_COMMAND='fd --type file --follow --hidden --exclude .git'
+export FZF_DEFAULT_COMMAND="fd --type file --color=always"
+export FZF_DEFAULT_OPTS="--ansi"
+
 eval $(thefuck --alias)
 
 #eval "$(fasd --init auto)"
 
 alias v='f -e vim'
 alias c='f -e bat'
+alias sudo='sudo '
+alias -s {txt,yml,xml}=vim
+alias -s {log,json,conf,csv}=cat
+alias -s {html}=w3m
 
 if [ $TILIX_ID ] || [ $VTE_VERSION ]; then
         source /etc/profile.d/vte.sh
 fi
+
+function chpwd() {
+    exa -l -snew
+    #emulate -L zsh
+    pwd
+}
 
 function d2h()
 {
@@ -131,8 +150,27 @@ function pgrep(){
   ps -ef | grep $1 | awk '{print $2}'
 }
 
+function zsh-stats() {
+  fc -l 1 | awk '{CMD[$2]++;count++;}END { for (a in CMD)print CMD[a] " " CMD[a]/count*100 "% " a;}' | grep -v "./" | column -c3 -s " " -t | sort -nr | nl | head -n25
+}
+
+alias -g G='| grep -i'
+alias -g GV='| grep -i -v'
+alias -g L='| less'
+alias -g L1='`ls -Art | tail -n 1`'
+alias -g S1='`ls -Ars | tail -n 1`'
+alias -g NE="2> /dev/null"
+alias -g NUL="> /dev/null 2>&1"
+
+alias less='less +G'
+alias dr='docker restart $1'
+alias ds='docker stop $1'
+alias medpid="docker top medaware_app | head -c 170 | grep -o '[[:digit:]]*'"
 alias pgrep1='ps -ef | grep $1'
 alias agrep='alias | grep $1'
+alias grepi='grep -i $1'
+alias gbd='git branch --sort=committerdate'
+alias gall='git branch --sort=committerdate'
 alias gf='git fetch origin $(current_branch)'
 alias gm='git merge origin $(current_branch)'
 alias gp='git push origin $(current_branch)'
@@ -146,10 +184,14 @@ alias hg='history | grep $1'
 alias j='jobs -l'
 alias ngrep='sudo netstat -natop | grep $1'
 alias dp='docker ps '
+alias dps='docker ps --format '\''table {{.ID}}\t{{.Names}}\t{{.Status}}\t{{.Image}}'\'''
 alias dpa='docker ps -a'
-alias pbcopy='xclip -selection clipboard'
+alias pbcopy='xargs echo -n | xclip -selection clipboard'
 alias pbpaste='xclip -selection clipboard -o'
 alias p='| pbcopy'
+alias pwd='pwd | tee /dev/tty | pbcopy'
+alias l='exa -l -snew'
+alias llse='exa -l -snew'
 alias ltr='exa -l -snew'
 alias lst='exa -l -snew'
 alias lsr='exa -l --sort=size'
@@ -193,19 +235,43 @@ alias ping='prettyping --nolegend'
 alias S='_ !!'
 alias d='dirs -v | head -10'
 alias mytilix='tilix --maximize  -s /home/roy/sessions/mysql.json -s /home/roy/sessions/medaware.json -s /home/roy/sessions/logs.json -s /home/roy/sessions/test.json &'
-alias idea='sudo /opt/idea/ideaIC-2019.1/idea-IC-191.6183.87/bin/idea.sh &'
+alias idea='sudo /opt/idea/ideaIC-2020.1/idea-IC-201.6668.121/bin/idea.sh '
 #alias idea='sudo /opt/idea/ideaIC-2018.3/idea-IC-183.4284.148/bin/idea.sh &'
 alias medaware='/home/roy/dev/workspace/medaware'
+alias startMed='docker start medaware_db;docker start medaware_app'
+alias startMac='docker start medaware_mssql;docker start medaware_db;docker start medaware_app'
 alias lmed='less -G /home/dev/medaware/tomcat/logs/medaware-all.log'
 alias llog='less -G /home/dev/medaware/tomcat/logs/medaware-all.log'
 alias lerr='less -G /home/dev/medaware/tomcat/logs/medaware-error.log'
 alias lsla='less -G /home/dev/medaware/tomcat/logs/medaware-sla.log'
-alias tlog='less -G /home/medaware/docker/tomcat/logs/tests_debug.log'
+alias tlog='less -G /home/roy/dev/workspace/tests/robot_Reports/tests_debug.log'
 alias logs='cd /home/dev/medaware/tomcat/logs'
 alias watch='watch '
+alias pick1='docker exec -i medaware_db mysql -u medaware -pmedaware medaware -e "select patientid from patients" 2>/dev/null | tail -1 | tee /dev/tty | pbcopy'
+alias count="docker exec -i medaware_db mysql -u medaware -pmedaware medaware -e 'select count(patientid) from patients' 2>/dev/null"
+alias pids="docker exec -i medaware_db mysql -u medaware -pmedaware medaware -e 'select patientid from patients' 2>/dev/null"
+alias alerts="docker exec -i medaware_db mysql -u medaware -pmedaware medaware -e 'select count(*),patientid from alerts group by patientid' 2>/dev/null"
+alias wh='which'
+alias p='pwd'
+alias r='robot'
 
+function c1() {
+  echo -e $@ | tee /dev/tty | pbcopy
+}
+function lsofw() {
+  sudo lsof -p $1 | awk 'NR==1 || $4~/[0-9]+[uw]/'
+}
+function realpath() {
+  /usr/bin/realpath $1 | tee /dev/tty | pbcopy
+}
+function pick {
+         google-chrome "http://localhost:8080/MedAwareDemo/reports/#/patient?admissionID=-1&patientID=int`docker exec -i medaware_db mysql -u medaware -pmedaware medaware -e 'select patientid from patients' 2>/dev/null | tail -1`"
+}
 function mylocalip(){
-	ip addr | grep enp0 | grep inet | awk {'print $2'} | sed 's/.\{3\}$//'
+	ip addr | grep enp0 | grep inet | awk {'print $2'} | sed 's/.\{3\}$//' | tee /dev/tty | pbcopy
+}
+function mywifiip(){
+       ip addr | grep wlp3s0 | grep inet | awk {'print $2'} | sed 's/.\{3\}$//' | tee /dev/tty | pbcopy
 }
 #flat tar - make it generalize
 #find . -name '*.jar' -not -name '*sources*' -exec tar --transform 's/.*\///g' -rvf my_file.tar {} \;
@@ -320,6 +386,21 @@ alias myuser="echo medaware_rlimony"
 alias y='yarn run build:server-dev'
 alias portainer='docker run -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer'
 
+
+function startMed(){
+  docker start medaware_db
+  docker start medaware_app
+}
+
+function startMedBlack(){
+  startMed
+  docker start medaware_blackbox
+}
+
+function startMedMaccabi(){
+  startMed
+  docker start medaware_mssql
+}
 
 function dmed(){
   de `dp | grep tomcat | awk '{print $1}'`
@@ -453,3 +534,6 @@ function color-ssh() {
     fi
     ssh $*
 }
+
+
+export PATH=/home/roy/anaconda3/bin:$PATH
