@@ -67,7 +67,7 @@ export PS1="\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git node npm git git-extras extract alias-tips z zsh-autosuggestions colored-man-pages fasd fzf sudo)
+plugins=(git node npm git git-extras extract alias-tips z zsh-autosuggestions colored-man-pages fasd fzf sudo hacker-quotes zsh-syntax-highlighting)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -154,64 +154,98 @@ function zsh-stats() {
   fc -l 1 | awk '{CMD[$2]++;count++;}END { for (a in CMD)print CMD[a] " " CMD[a]/count*100 "% " a;}' | grep -v "./" | column -c3 -s " " -t | sort -nr | nl | head -n25
 }
 
+#shortcuts for pipes less grep
 alias -g G='| grep -i'
 alias -g GV='| grep -i -v'
 alias -g L='| less'
+alias -g LG='less +G'
+alias -g W='| wc -l'
+alias -g P='xargs echo -n | xclip -selection clipboard'
+alias -g C='| pbcopy'  # same as P
 alias -g L1='`ls -Art | tail -n 1`'
 alias -g S1='`ls -Ars | tail -n 1`'
 alias -g NE="2> /dev/null"
 alias -g NUL="> /dev/null 2>&1"
-
-alias less='less +G'
-alias dr='docker restart $1'
-alias ds='docker stop $1'
-alias medpid="docker top medaware_app | head -c 170 | grep -o '[[:digit:]]*'"
-alias pgrep1='ps -ef | grep $1'
-alias agrep='alias | grep $1'
+alias -g OE="2>&1 | less"
+#alias less='less +G'
 alias grepi='grep -i $1'
-alias gbd='git branch --sort=committerdate'
-alias gall='git branch --sort=committerdate'
-alias gf='git fetch origin $(current_branch)'
-alias gm='git merge origin $(current_branch)'
-alias gp='git push origin $(current_branch)'
-alias gpc='git push origin $(current_branch) && custom-build'
-alias glom='sudo git pull origin master'
-alias g1='git log --oneline'
-alias g1me='g1 --author="$(g config user.name)"'
-alias u='sudo apt update'
-alias hi='history'
-alias hg='history | grep $1'
-alias j='jobs -l'
-alias ngrep='sudo netstat -natop | grep $1'
-alias dp='docker ps '
-alias dps='docker ps --format '\''table {{.ID}}\t{{.Names}}\t{{.Status}}\t{{.Image}}'\'''
-alias dpa='docker ps -a'
-alias pbcopy='xargs echo -n | xclip -selection clipboard'
-alias pbpaste='xclip -selection clipboard -o'
-alias p='| pbcopy'
-alias pwd='pwd | tee /dev/tty | pbcopy'
 alias l='exa -l -snew'
 alias llse='exa -l -snew'
 alias ltr='exa -l -snew'
 alias lst='exa -l -snew'
 alias lsr='exa -l --sort=size'
 alias lall='exa -bghHliS'
+
+#shell stuff aliases / history
+alias agrep='alias | grep $1'
+alias u='sudo apt update'
+alias hi='history'
+alias hg='history | grep $1'
+alias pbcopy='xargs echo -n | xclip -selection clipboard'
+alias pbpaste='xclip -selection clipboard -o'
+alias pwd='pwd | tee /dev/tty | pbcopy'
+alias p='pwd'
+alias real='realpath'
+alias r='realpath'
 alias number="sed ':a;s/\B[0-9]\{3\}\>/,&/;ta'"
-alias threads='ps -T -p $1'
 alias 'wcl'=' wc -l | number'
-alias gwhat='git diff --stat --cached origin/master'
-alias gwhat1='git cherry -v origin/master'
-alias glog="git log --graph --pretty=format:'%Cred%h%Creset %an: %s - %Creset %C(yellow)%d%Creset %Cgreen(%cr)%Creset' --abbrev-commit --date=relative"
-alias sea="nc seashells.io 1337"
-alias iotop="_ iotop"
-alias listen='sudo lsof -i -P | grep -i "listen"'
 alias diff='colordiff'
 alias lastfiles='ls -1 | tail -n $1'
 alias h1='`!!` |  head -1'
 alias t1='!! |  tail -1'
 alias oneline='paste -s'
 alias mysum='paste -sd+ - | bc'
+alias idea='sudo /opt/idea/ideaIC-2020.1/idea-IC-201.6668.121/bin/idea.sh '
+#alias idea='sudo /opt/idea/ideaIC-2018.3/idea-IC-183.4284.148/bin/idea.sh &'
+alias cat='bat'
+alias d='d1'
+alias cdl='cd `ls -Art | tail -n 1`'
+function d1() {
+    dirs -v | head -10 | sed 's/\t/ ---> /g'
+}
+function fcd () { [ -f "$1" ] && { cd "$(dirname "$1")"; } || { cd "$1"; } }
+alias wh='which'
+alias ro='robot'
+alias t='tree'
 
+
+#git stuff
+alias gbd='git branch --sort=committerdate'
+alias gall='git branch --sort=committerdate'
+alias gfc='git fetch origin $(current_branch)'
+alias gf='git fetch'
+alias gm='git merge origin $(current_branch)'
+alias gp='git push origin $(current_branch)'
+alias gpc='git push origin $(current_branch) && custom-build'
+alias glom='git pull origin master'
+alias g1='git log --oneline'
+alias g1me='g1 --author="$(g config user.name)"'
+alias gwhat='git diff --stat --cached origin/master'
+alias gwhat1='git cherry -v origin/master'
+alias glog="git log --graph --pretty=format:'%Cred%h%Creset %an: %s - %Creset %C(yellow)%d%Creset %Cgreen(%cr)%Creset' --abbrev-commit --date=relative"
+
+
+#process
+alias pgrep1='ps -ef | grep $1'
+alias j='jobs -l'
+alias threads='ps -T -p $1'
+
+#network
+alias ngrep='sudo netstat -natop | grep $1'
+alias sea="nc seashells.io 1337"
+alias iotop="_ iotop"
+alias listen='sudo lsof -i -P | grep -i "listen"'
+alias ping='prettyping --nolegend'
+
+
+#docker
+alias dr='docker restart $1'
+alias ds='docker stop $1'
+alias dp='docker ps '
+alias dps='docker ps --format '\''table {{.ID}}\t{{.Names}}\t{{.Status}}\t{{.Image}}'\'''
+alias dpa='docker ps -a'
+
+#shell stuff less used
 alias ntmux="TMUX= tmux new-session -d -s "
 alias stmux="tmux switch-client -t "
 alias df='df -h'
@@ -225,18 +259,17 @@ alias nowtime=now
 alias nowdate='date +"%d-%m-%Y"'
 alias ports='netstat -tulanp'
 alias monitor='echo "dstat\\nuptime\\ndmesg | tail\\nvmstat 1\\nmpstat -P ALL 1\\npidstat 1\\niostat -xz 1nfree -m\\nsar -n DEV 1\\nsar -n TCP,ETCP 1\\ntop\\niotop\\ndocker stats"'
-alias localsettings='vim /home/dev/medaware/localSettings/applicationSettings.yml'
 alias top10='_ du -a . | sort -n -r | head -n 10'
 alias xml='xmllint --format - | pygmentize -l xml'
 alias docker-cleanup='_ ~/docker-cleanup.sh'
-alias typeless='cat ~/.zsh_history | cut -d ";" -f 2- | cut -d " " -f 1-4 | sort | uniq -c | sort -g'
-alias cat='bat'
-alias ping='prettyping --nolegend'
+alias typeless='ca  t ~/.zsh_history | cut -d ";" -f 2- | cut -d " " -f 1-4 | sort | uniq -c | sort -g'
 alias S='_ !!'
-alias d='dirs -v | head -10'
 alias mytilix='tilix --maximize  -s /home/roy/sessions/mysql.json -s /home/roy/sessions/medaware.json -s /home/roy/sessions/logs.json -s /home/roy/sessions/test.json &'
-alias idea='sudo /opt/idea/ideaIC-2020.1/idea-IC-201.6668.121/bin/idea.sh '
-#alias idea='sudo /opt/idea/ideaIC-2018.3/idea-IC-183.4284.148/bin/idea.sh &'
+alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+
+
+#medaware specific
+alias medpid="docker top medaware_app | head -c 170 | grep -o '[[:digit:]]*'"
 alias medaware='/home/roy/dev/workspace/medaware'
 alias startMed='docker start medaware_db;docker start medaware_app'
 alias startMac='docker start medaware_mssql;docker start medaware_db;docker start medaware_app'
@@ -251,9 +284,14 @@ alias pick1='docker exec -i medaware_db mysql -u medaware -pmedaware medaware -e
 alias count="docker exec -i medaware_db mysql -u medaware -pmedaware medaware -e 'select count(patientid) from patients' 2>/dev/null"
 alias pids="docker exec -i medaware_db mysql -u medaware -pmedaware medaware -e 'select patientid from patients' 2>/dev/null"
 alias alerts="docker exec -i medaware_db mysql -u medaware -pmedaware medaware -e 'select count(*),patientid from alerts group by patientid' 2>/dev/null"
-alias wh='which'
-alias p='pwd'
-alias r='robot'
+alias localsettings='vim /home/dev/medaware/localSettings/applicationSettings.yml'
+alias jenkinsLogs='cd /home/medaware/nfs/Tests/tests/results/Dev/custom-Build-and-Tests/'
+alias err='l G err'
+alias sla='l G sla'
+alias sla='l G sla'
+alias all='l G all'
+
+
 
 function c1() {
   echo -e $@ | tee /dev/tty | pbcopy
@@ -311,20 +349,22 @@ function show() {
   fi
 }
 
-cdl()    {
-  cd"$@";
-  ltr;
-}
-
-
 function mkcd () {
   mkdir "$1"
   cd "$1"
 }
 
 function bck () {
-  cp "$2" "$2.bck"
-  cp "$1" "$2"
+  if [ "$#" -eq 1 ]; then
+      cp "$1" "$1.bck"
+  elif [ "$#" -eq 2 ]; then
+    cp "$2" "$2.bck"
+    cp "$1" "$2"
+  else
+         echo "Illegal number of parameters"
+  fi
+
+
 }
 
 function lastcommandfailed() {
