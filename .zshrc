@@ -200,6 +200,9 @@ alias idea='sudo /opt/idea/ideaIC-2020.1/idea-IC-201.6668.121/bin/idea.sh '
 alias cat='bat'
 alias d='d1'
 alias cdl='cd `ls -Art | tail -n 1`'
+function tmp(){
+    cp $1 ~/tmp
+}
 function d1() {
     dirs -v | head -10 | sed 's/\t/ ---> /g'
 }
